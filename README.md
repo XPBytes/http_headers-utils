@@ -47,6 +47,11 @@ class ListBasedHeader < Utils::List
 end
 ```
 
+## Related
+
+- [HttpHeaders::Accept](https://github.com/XPBytes/http_headers-accept): :nut_and_bolt: Utility to parse and sort the "Accept" HTTP Header
+- [HttpHeaders::AcceptLanguage](https://github.com/XPBytes/http_headers-accept_language): :nut_and_bolt: Utility to parse and sort the "Accept-Language" HTTP Header
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can
