@@ -4,7 +4,7 @@
 [![Gem Version](https://badge.fury.io/rb/http_headers-utils.svg)](https://badge.fury.io/rb/http_headers-utils)
 [![MIT license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
 
-Authorize a certain block with cancan
+:nut_and_bolt: Utility belt for the HttpHeader libraries
 
 ## Installation
 
