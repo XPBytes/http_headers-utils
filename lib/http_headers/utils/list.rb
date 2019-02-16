@@ -1,15 +1,12 @@
-require 'delegate'
-
 module HttpHeaders
   module Utils
 
     ##
     # @example Accept values
     #
-    #   class Accept < HttpHeaders::Utils::List
+    #   class Accept < DelegateClass(Array)
     #     def initialize(value)
-    #       super value, entry_klazz: Accept::Entry
-    #       sort!
+    #       super HttpHeaders::List.new(value, entry_klazz: Accept::Entry)
     #     end
     #
     #     class Entry
@@ -32,39 +29,35 @@ module HttpHeaders
     #   Accept.new(['*/*; q=0.1', 'application/json, text/html; q=0.8'])
     #   # => List['application/json', 'text/html', '*/*']
     #
-    class List < DelegateClass(Array)
-
+    module List
       HEADER_DELIMITER    = ','
       PARAMETER_DELIMITER = ';'
 
-      class << self
-        def parse(combined, entry_klazz:)
-          Array(combined).map { |line| line.split(HEADER_DELIMITER) }.flatten.each_with_index.map do |entry, index|
-            value, *parameters = entry.split(PARAMETER_DELIMITER)
-            indexed_parameters = Hash[Array(parameters).map { |p| p.strip.split('=') }].transform_keys!(&:to_sym)
-            entry_klazz.new(value, index: index, parameters: indexed_parameters)
-          end
+      module_function
+
+      def parse(combined, entry_klazz:)
+        Array(combined).map { |line| line.split(HEADER_DELIMITER) }.flatten.each_with_index.map do |entry, index|
+          value, *parameters = entry.strip.split(PARAMETER_DELIMITER)
+          indexed_parameters = Hash[Array(parameters).map { |p| p.strip.split('=') }].transform_keys!(&:to_sym)
+          entry_klazz.new(value, index: index, parameters: indexed_parameters)
         end
       end
 
-      ##
-      # Create a new list
-      #
-      # @param value [String] the header value
-      # @param entry_klazz [Class] the class for the list items
-      #
-      # @see List.parse
-      #
-      def initialize(value, entry_klazz:)
-        super List.parse(value, entry_klazz: entry_klazz)
+      def new(combined, entry_klazz:)
+        result = parse(combined, entry_klazz: entry_klazz)
+        entry_klazz.instance_methods(false).include?(:<=>) ? result.sort! : result
       end
 
-      def sort!
-        __setobj__(__getobj__.sort!)
+      def to_header(list)
+        # noinspection RubyBlockToMethodReference
+        list.map { |entry| stringify_entry(entry) }
+            .join("#{HEADER_DELIMITER} ")
       end
 
-      def inspect
-        map(&:inspect).join(', ')
+      def stringify_entry(entry)
+        return entry.to_header if entry.respond_to?(:to_header)
+        return entry.to_s if entry.respond_to?(:to_s)
+        entry.inspect
       end
     end
   end
